@@ -28,10 +28,11 @@ function main() {
  * @param res {Response}
  */
 async function serveRequest(req, res) {
-    let filePath = path.join(process.cwd(), req.url);
-    if (req.url.endsWith("/")) {
-        filePath = path.join(filePath, "index.html")
+    let relativePath = req.url.split("?")[0];
+    if (relativePath.endsWith("/")) {
+        relativePath = path.join(relativePath, "index.html")
     };
+    const filePath = path.join(process.cwd(), relativePath);
     if (! isAccessible(filePath)) {
         console.log(`404: ${filePath}`);
         res.writeHead(404);
