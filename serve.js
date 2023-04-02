@@ -20,7 +20,7 @@ function main() {
     const port = args[0] ?? 8000;
     http.createServer(serveRequest).listen(port);
     const rootDir = process.cwd();
-    console.log(`Sering ${rootDir} at http://localhost:${port}/`);
+    console.log(`Serving ${rootDir} at http://localhost:${port}/`);
 }
 
 /**
@@ -44,7 +44,19 @@ async function serveRequest(req, res) {
     res.writeHead(200, { 
         "Content-Type": MIME_TYPES[ext] || MIME_TYPES.default 
     });
-    fs.createReadStream(filePath).pipe(res);
+    try {
+        const stream = fs.createReadStream(filePath);
+        stream.on('error', function(e) {
+            console.log(`500: ${filePath}`, e);
+            res.writeHead(404);
+            res.write("not found");
+        });
+        stream.pipe(res);
+    } catch(e) {
+        console.log(`500: ${filePath}`, e);
+        res.writeHead(404);
+        res.write("not found");
+    }
 }
 
 /**
